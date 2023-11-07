@@ -24,12 +24,12 @@ async function generateTokenResponse(user, accessToken) {
 
 exports.add = async (req, res, next) => {
     try {
-        const userData = req.body;
+        const userData = pick(req.body, 'name', 'uid');
         const exists = await userCollection.findOne({
             $or: [{ uid: userData.uid }, { email: userData.email }],
         });
         if (!exists) {
-            const user = await userCollection.insertOne(pick(userData, 'email, uid'));
+            const user = await userCollection.insertOne(userData);
             if (user.acknowledged) {
                 const token = await generateTokenResponse(
                     userData,
