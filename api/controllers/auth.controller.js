@@ -1,48 +1,62 @@
 const httpStatus = require("http-status");
 const moment = require("moment-timezone");
 const { jwtExpirationInterval } = require("../../config/vars");
-const { omit, pick } = require("lodash");
 
 const RefreshToken = require("../utils/Refreshtoken.utils");
 const { userCollection } = require("../../config/mongodb");
 const APIError = require("../errors/api-error");
+const { pick } = require("lodash");
 
 async function generateTokenResponse(user, accessToken) {
     const tokenType = "Bearer";
-    const refreshToken =  (await RefreshToken.generate(user)).token;
+    const tokens = await RefreshToken.generate(user);
+    const refreshToken = tokens.token;
+    const maxAge = tokens.expires;
     const expiresIn = moment().add(jwtExpirationInterval, "minutes");
     return {
         tokenType,
         accessToken,
         refreshToken,
         expiresIn,
+        maxAge,
     };
 }
 
 exports.add = async (req, res, next) => {
     try {
-        const userData = omit(req.body, "role");
-        const exists = await userCollection.findOne(pick(userData, "uid"));
+        const userData = req.body;
+        const exists = await userCollection.findOne({
+            $or: [{ uid: userData.uid }, { email: userData.email }],
+        });
         if (!exists) {
-            const user = await userCollection.insertOne(userData);
+            const user = await userCollection.insertOne(pick(userData, 'name, email, uid'));
             if (user.acknowledged) {
                 const token = await generateTokenResponse(
                     userData,
                     RefreshToken.token(userData)
                 );
                 res.status(httpStatus.CREATED);
-                return res.json({
-                    token,
-                });
+                return res
+                    .cookie("access-token", token.accessToken, {
+                        expires: moment(token.expiresIn).toDate(),
+                        httpOnly: true,
+                    })
+                    .cookie("refresh-token", token.refreshToken, {
+                        expires: token.maxAge,
+                        httpOnly: true,
+                    })
+                    .json({
+                        expires: token.expiresIn,
+                    });
             } else throw new Error("Something went wrong");
         } else {
             throw new APIError({
                 message: "Validation Error",
                 errors: [
                     {
-                        field: "uid",
+                        field: "email",
                         location: "body",
-                        messages: ['"uid" already exists'],
+                        messages: ['"email" already exists'],
                     },
                 ],
                 status: httpStatus.CONFLICT,

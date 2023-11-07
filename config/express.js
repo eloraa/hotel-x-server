@@ -7,8 +7,9 @@ const methodOverride = require("method-override");
 const cors = require("cors");
 const helmet = require("helmet");
 const routes = require("../api/routes/v1");
-const { logs, favicon } = require("./vars");
+const { logs, favicon, allowedHost } = require("./vars");
 const error = require("../api/middlewares/error");
+const cookieParser = require("cookie-parser");
 
 /**
  * Express instance
@@ -37,7 +38,13 @@ app.use(methodOverride());
 app.use(helmet());
 
 // enable CORS - Cross Origin Resource Sharing
-app.use(cors());
+app.use(cors({
+    origin: allowedHost.split(','),
+    credentials: true
+}));
+
+// enable COOKIES
+app.use(cookieParser())
 
 // mount api v1 routes
 app.use("/v1", routes);
