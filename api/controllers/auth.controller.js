@@ -24,7 +24,7 @@ async function generateTokenResponse(user, accessToken) {
 
 exports.add = async (req, res, next) => {
     try {
-        const userData = pick(req.body, 'name', 'uid');
+        const userData = pick(req.body, "uid", "email");
         const exists = await userCollection.findOne({
             $or: [{ uid: userData.uid }, { email: userData.email }],
         });
