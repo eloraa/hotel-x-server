@@ -29,7 +29,7 @@ exports.add = async (req, res, next) => {
             $or: [{ uid: userData.uid }, { email: userData.email }],
         });
         if (!exists) {
-            const user = await userCollection.insertOne(pick(userData, 'name, email, uid'));
+            const user = await userCollection.insertOne(pick(userData, 'email, uid'));
             if (user.acknowledged) {
                 const token = await generateTokenResponse(
                     userData,

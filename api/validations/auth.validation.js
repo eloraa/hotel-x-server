@@ -3,7 +3,6 @@ const Joi = require("joi");
 module.exports = {
     add: {
         body: {
-            name: Joi.string().max(50).min(3).required(),
             email: Joi.string().email().required(),
             uid: Joi.string().min(5).required(),
         },
