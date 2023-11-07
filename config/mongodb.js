@@ -29,4 +29,6 @@ exports.connect = () => {
 */
 exports.client =  client;
 exports.db =  client.db(dbname);
-exports.roomCollections =  client.db(dbname).collection('rooms');
+exports.roomCollection =  client.db(dbname).collection('rooms');
+exports.userCollection =  client.db(dbname).collection('users');
+exports.tokenCollection =  client.db(dbname).collection('tokens');
