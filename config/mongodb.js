@@ -29,3 +29,4 @@ exports.connect = () => {
 */
 exports.client =  client;
 exports.db =  client.db(dbname);
+exports.roomCollections =  client.db(dbname).collection('rooms');
