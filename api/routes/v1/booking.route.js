@@ -1,14 +1,19 @@
-const express = require('express');
-const controller = require('../../controllers/booking.controller');
+const express = require("express");
+const controller = require("../../controllers/booking.controller");
 const router = express.Router();
-const validate = require('express-validation');
-const { book } = require('../../validations/booking.validation');
-
+const validate = require("express-validation");
+const { book, get } = require("../../validations/booking.validation");
 router
-      .route('/book')
+    .route("/:uid")
 
-      .post(validate(book), controller.book)
+    .get(validate(get), controller.list);
+router
+    .route("/book")
 
+    .post(validate(book), controller.book);
+router
+    .route("/")
 
+    .put(validate(book), controller.delete);
 
 module.exports = router;

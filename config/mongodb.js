@@ -20,7 +20,10 @@ exports.connect = () => {
         .connect()
         .then(() =>client.db(dbname).command({ ping: 1 }))
         .then(() => logger.info("mongoDB connected..."))
-        .catch((error) => logger.error(error))
+        .catch((error) => {
+            logger.error(error)
+            process.exit(-1)
+        })
 
     return client;
 };
