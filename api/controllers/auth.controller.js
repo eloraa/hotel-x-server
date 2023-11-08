@@ -1,6 +1,7 @@
 const httpStatus = require("http-status");
 const moment = require("moment-timezone");
-const { jwtExpirationInterval } = require("../../config/vars");
+const { jwtExpirationInterval, jwtSecret } = require("../../config/vars");
+const jwt = require("jsonwebtoken");
 
 const RefreshToken = require("../utils/Refreshtoken.utils");
 const { userCollection, tokenCollection } = require("../../config/mongodb");
@@ -24,7 +25,7 @@ async function generateTokenResponse(user, accessToken) {
 
 exports.add = async (req, res, next) => {
     try {
-        const userData = pick(req.body, "uid", "email", 'photoURL');
+        const userData = pick(req.body, "uid", "email", "photoURL");
         const exists = await userCollection.findOne({
             $or: [{ uid: userData.uid }, { email: userData.email }],
         });
@@ -41,13 +42,13 @@ exports.add = async (req, res, next) => {
                         expires: moment(token.expiresIn).toDate(),
                         httpOnly: true,
                         secure: true,
-                        sameSite: 'none'
+                        sameSite: "none",
                     })
                     .cookie("refresh-token", token.refreshToken, {
                         expires: token.maxAge,
                         httpOnly: true,
                         secure: true,
-                        sameSite: 'none'
+                        sameSite: "none",
                     })
                     .json({
                         expires: token.expiresIn,
@@ -65,6 +66,34 @@ exports.add = async (req, res, next) => {
                 ],
                 status: httpStatus.CONFLICT,
                 isPublic: true,
+            });
+        }
+    } catch (error) {
+        return next(error);
+    }
+};
+
+exports.update = async (req, res, next) => {
+    try {
+        const user = pick(req.body, "uid", "email");
+        const accessToken = pick(req.cookies, "access-token");
+
+        if (!accessToken["access-token"])
+            return res.status(httpStatus.UNAUTHORIZED).json({
+                message: "Unauthorized",
+            });
+
+        const data = jwt.verify(accessToken["access-token"], jwtSecret);
+
+        if (data && data.sub === user.uid) {
+            const result = await userCollection.updateOne(user, {
+                $set: { photoURL: req.body.photoURL },
+            });
+            if (result.modifiedCount) return res.json({ success: true });
+            else return res.json({ success: false });
+        } else {
+            return res.status(httpStatus.UNAUTHORIZED).json({
+                message: "UNAUTHORIZED",
             });
         }
     } catch (error) {
@@ -93,13 +122,13 @@ exports.get = async (req, res, next) => {
                     expires: moment(token.expiresIn).toDate(),
                     httpOnly: true,
                     secure: true,
-                    sameSite: 'none'
+                    sameSite: "none",
                 })
                 .cookie("refresh-token", token.refreshToken, {
                     expires: token.maxAge,
                     httpOnly: true,
                     secure: true,
-                    sameSite: 'none'
+                    sameSite: "none",
                 })
                 .json({
                     expires: token.expiresIn,
@@ -110,39 +139,43 @@ exports.get = async (req, res, next) => {
     }
 };
 
-
 exports.refresh = async (req, res, next) => {
     try {
         const userData = pick(req.body, "uid", "email");
 
-        const refreshToken = pick(req.cookies, 'refresh-token')
+        const refreshToken = pick(req.cookies, "refresh-token");
 
         const err = {
             status: httpStatus.UNAUTHORIZED,
             message: "UNAUTHORIZED",
             isPublic: true,
         };
-        if(isEmpty(refreshToken)) {
+        if (isEmpty(refreshToken)) {
             throw new APIError(err);
         }
 
-
-        const tokens = await tokenCollection.findOne({ token: refreshToken['refresh-token'], userId: userData.uid });
+        const tokens = await tokenCollection.findOne({
+            token: refreshToken["refresh-token"],
+            userId: userData.uid,
+        });
         const expiresIn = moment().add(jwtExpirationInterval, "minutes");
         if (tokens) {
-            if(moment(tokens.expires).isBefore()) {
-                await tokenCollection.findOneAndDelete({ token: refreshToken['refresh-token'], userId: userData.uid })
+            if (moment(tokens.expires).isBefore()) {
+                await tokenCollection.findOneAndDelete({
+                    token: refreshToken["refresh-token"],
+                    userId: userData.uid,
+                });
                 throw new APIError(err);
             }
 
-            const token = RefreshToken.token(userData)
+            const token = RefreshToken.token(userData);
             console.log(token);
             return res
                 .cookie("access-token", token, {
                     expires: moment(expiresIn).toDate(),
                     httpOnly: true,
                     secure: true,
-                    sameSite: 'none'
+                    sameSite: "none",
                 })
                 .json({
                     expires: expiresIn,

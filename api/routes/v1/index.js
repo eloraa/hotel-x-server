@@ -4,7 +4,7 @@ const newletterroute = require('./newsletter.route');
 const roomsroute = require('./rooms.route');
 const authroute = require('./auth.route');
 const bookingroute = require('./booking.route');
-const reviewroute = require('./booking.route');
+const reviewroute = require('./review.route');
 
 /**
  * GET v1/status

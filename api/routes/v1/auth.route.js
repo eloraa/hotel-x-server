@@ -10,6 +10,10 @@ router
     .route("/add-user")
 
     .post(validate(add), controller.add);
+router
+    .route("/update-user")
+
+    .post(validate(add), controller.update);
 
 router
     .route("/get-token")

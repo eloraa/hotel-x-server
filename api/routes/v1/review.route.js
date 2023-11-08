@@ -1,24 +1,13 @@
-const express = require('express');
-const controller = require('../../controllers/rooms.controller');
+const express = require("express");
+const controller = require("../../controllers/review.controller");
 const router = express.Router();
-const validate = require('express-validation');
-const { get, book } = require('../../validations/room.validation');
+const validate = require("express-validation");
+const { add } = require("../../validations/review.validation");
+
 
 router
-  .route('/')
+    .route("/")
 
-  .get(controller.list)
-
-router
-  .route('/featured')
-
-  .get(controller.featured)
-
-router
-      .route('/:id')
-
-      .get(validate(get), controller.get)
-
-
+    .post(validate(add), controller.add);
 
 module.exports = router;
