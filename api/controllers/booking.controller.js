@@ -160,18 +160,7 @@ exports.update = async (req, res, next) => {
         if (data && data.sub === room.uid) {
             const result = await bookingCollection.updateOne(room, { $set: { date: req.body.date } });
             if (result.matchedCount) {
-                const result = await roomCollection.updateOne(
-                    { _id: new ObjectId(room.roomId) },
-                    { $inc: { remaining_count: 1 } }
-                );
-                if (result.modifiedCount) {
-                    return res.json({ success: true });
-                } else {
-                    throw new APIError({
-                        message: "Something went wrong",
-                        status: httpStatus.NOT_MODIFIED,
-                    });
-                }
+                return res.json({ success: true });
             } else {
                 res.status(httpStatus.BAD_REQUEST);
                 return res.json({ success: false });
