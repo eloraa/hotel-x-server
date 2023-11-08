@@ -2,7 +2,7 @@ const express = require('express');
 const controller = require('../../controllers/rooms.controller');
 const router = express.Router();
 const validate = require('express-validation');
-const { get } = require('../../validations/room.validation');
+const { get, book } = require('../../validations/room.validation');
 
 router
   .route('/')

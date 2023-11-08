@@ -20,6 +20,7 @@ exports.connect = () => {
         .connect()
         .then(() =>client.db(dbname).command({ ping: 1 }))
         .then(() => logger.info("mongoDB connected..."))
+        .catch((error) => logger.error(error))
 
     return client;
 };
@@ -32,3 +33,4 @@ exports.db =  client.db(dbname);
 exports.roomCollection =  this.db.collection('rooms');
 exports.userCollection =  this.db.collection('users');
 exports.tokenCollection =  this.db.collection('tokens');
+exports.bookingCollection =  this.db.collection('bookings');
