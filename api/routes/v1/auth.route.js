@@ -2,7 +2,7 @@ const express = require("express");
 const validate = require("express-validation");
 const controller = require("../../controllers/auth.controller");
 
-const { add, get } = require("../../validations/auth.validation");
+const { add, get, refresh } = require("../../validations/auth.validation");
 
 const router = express.Router();
 
@@ -15,5 +15,9 @@ router
     .route("/get-token")
 
     .post(validate(get), controller.get);
+router
+    .route("/refresh-token")
+
+    .post(validate(refresh), controller.refresh);
 
 module.exports = router;

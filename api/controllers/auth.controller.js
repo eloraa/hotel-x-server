@@ -3,9 +3,9 @@ const moment = require("moment-timezone");
 const { jwtExpirationInterval } = require("../../config/vars");
 
 const RefreshToken = require("../utils/Refreshtoken.utils");
-const { userCollection } = require("../../config/mongodb");
+const { userCollection, tokenCollection } = require("../../config/mongodb");
 const APIError = require("../errors/api-error");
-const { pick } = require("lodash");
+const { pick, isEmpty } = require("lodash");
 
 async function generateTokenResponse(user, accessToken) {
     const tokenType = "Bearer";
@@ -95,6 +95,47 @@ exports.get = async (req, res, next) => {
                 })
                 .json({
                     expires: token.expiresIn,
+                });
+        } else throw new APIError(err);
+    } catch (error) {
+        return next(error);
+    }
+};
+
+
+exports.refresh = async (req, res, next) => {
+    try {
+        const userData = pick(req.body, "uid", "email");
+
+        const refreshToken = pick(req.cookies, 'refresh-token')
+
+        const err = {
+            status: httpStatus.UNAUTHORIZED,
+            message: "UNAUTHORIZED",
+            isPublic: true,
+        };
+        if(isEmpty(refreshToken)) {
+            throw new APIError(err);
+        }
+
+
+        const tokens = await tokenCollection.findOne({ token: refreshToken['refresh-token'], userId: userData.uid });
+        const expiresIn = moment().add(jwtExpirationInterval, "minutes");
+        if (tokens) {
+            if(moment(tokens.expires).isBefore()) {
+                await tokenCollection.findOneAndDelete({ token: refreshToken['refresh-token'], userId: userData.uid })
+                throw new APIError(err);
+            }
+
+            const token = RefreshToken.token(userData)
+            console.log(token);
+            return res
+                .cookie("access-token", token, {
+                    expires: moment(expiresIn).toDate(),
+                    httpOnly: true,
+                })
+                .json({
+                    expires: expiresIn,
                 });
         } else throw new APIError(err);
     } catch (error) {

@@ -16,7 +16,7 @@ module.exports = {
     refresh: {
         body: {
             email: Joi.string().email().required(),
-            refreshToken: Joi.string().required(),
-        },
+            uid: Joi.string().min(5).required(),
+        }
     },
 };
