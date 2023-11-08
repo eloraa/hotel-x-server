@@ -83,7 +83,6 @@ exports.book = async (req, res, next) => {
                     { _id: new ObjectId(userData.roomId) },
                     { $inc: { remaining_count: -1 } }
                 );
-                console.log(userData.roomId);
                 if (result.modifiedCount) {
                     return res.json({ success: true });
                 } else
@@ -120,7 +119,18 @@ exports.delete = async (req, res, next) => {
         if (data && data.sub === room.uid) {
             const result = await bookingCollection.deleteOne(room);
             if (result.deletedCount) {
-                return res.json({ success: true });
+                const result = await roomCollection.updateOne(
+                    { _id: new ObjectId(room.roomId) },
+                    { $inc: { remaining_count: 1 } }
+                );
+                if (result.modifiedCount) {
+                    return res.json({ success: true });
+                } else {
+                    throw new APIError({
+                        message: "Something went wrong",
+                        status: httpStatus.NOT_MODIFIED,
+                    });
+                }
             } else {
                 res.status(httpStatus.BAD_REQUEST);
                 return res.json({ success: false });
@@ -134,3 +144,45 @@ exports.delete = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.update = async (req, res, next) => {
+    try {
+        const accessToken = pick(req.cookies, "access-token");
+        const room = pick(req.body, "uid", "roomId");
+
+        if (!accessToken["access-token"])
+            return res.status(httpStatus.UNAUTHORIZED).json({
+                message: "UNAUTHORIZED",
+            });
+
+        const data = jwt.verify(accessToken["access-token"], jwtSecret);
+
+        if (data && data.sub === room.uid) {
+            const result = await bookingCollection.updateOne(room, { $set: { date: req.body.date } });
+            if (result.matchedCount) {
+                const result = await roomCollection.updateOne(
+                    { _id: new ObjectId(room.roomId) },
+                    { $inc: { remaining_count: 1 } }
+                );
+                if (result.modifiedCount) {
+                    return res.json({ success: true });
+                } else {
+                    throw new APIError({
+                        message: "Something went wrong",
+                        status: httpStatus.NOT_MODIFIED,
+                    });
+                }
+            } else {
+                res.status(httpStatus.BAD_REQUEST);
+                return res.json({ success: false });
+            }
+        } else {
+            return res.status(httpStatus.UNAUTHORIZED).json({
+                message: "UNAUTHORIZED",
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+

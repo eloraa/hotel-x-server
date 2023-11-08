@@ -11,6 +11,11 @@ router
     .route("/book")
 
     .post(validate(book), controller.book);
+
+router
+    .route("/update")
+
+    .patch(validate(book), controller.update);
 router
     .route("/")
 
