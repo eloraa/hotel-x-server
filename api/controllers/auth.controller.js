@@ -67,3 +67,37 @@ exports.add = async (req, res, next) => {
         return next(error);
     }
 };
+exports.get = async (req, res, next) => {
+    try {
+        const userData = pick(req.body, "uid", "email");
+
+        const err = {
+            status: httpStatus.UNAUTHORIZED,
+            message: "User not found",
+            isPublic: true,
+        };
+
+        const user = await userCollection.findOne(userData);
+        if (user) {
+            const token = await generateTokenResponse(
+                user,
+                RefreshToken.token(user)
+            );
+
+            return res
+                .cookie("access-token", token.accessToken, {
+                    expires: moment(token.expiresIn).toDate(),
+                    httpOnly: true,
+                })
+                .cookie("refresh-token", token.refreshToken, {
+                    expires: token.maxAge,
+                    httpOnly: true,
+                })
+                .json({
+                    expires: token.expiresIn,
+                });
+        } else throw new APIError(err);
+    } catch (error) {
+        return next(error);
+    }
+};

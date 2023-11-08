@@ -19,7 +19,6 @@ exports.add = async (req, res, next) => {
                         messages: ['"email" already exists'],
                     },
                 ],
-                status: httpStatus.CONFLICT,
                 isPublic: true,
             });
             return next(error)
