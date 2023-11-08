@@ -38,13 +38,23 @@ app.use(methodOverride());
 app.use(helmet());
 
 // enable CORS - Cross Origin Resource Sharing
-app.use(cors({
-    origin: allowedHost.split(','),
-    credentials: true
-}));
+app.use(
+    cors({
+        origin: allowedHost.split(","),
+        credentials: true,
+    })
+);
 
 // enable COOKIES
-app.use(cookieParser())
+app.use(
+    cookieParser({
+        cookie: {
+            secure: true,
+            httpOnly: false,
+            sameSite: "none",
+        },
+    })
+);
 
 // mount api v1 routes
 app.use("/v1", routes);

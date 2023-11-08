@@ -24,7 +24,7 @@ async function generateTokenResponse(user, accessToken) {
 
 exports.add = async (req, res, next) => {
     try {
-        const userData = pick(req.body, "uid", "email");
+        const userData = pick(req.body, "uid", "email", 'photoURL');
         const exists = await userCollection.findOne({
             $or: [{ uid: userData.uid }, { email: userData.email }],
         });
@@ -40,10 +40,14 @@ exports.add = async (req, res, next) => {
                     .cookie("access-token", token.accessToken, {
                         expires: moment(token.expiresIn).toDate(),
                         httpOnly: true,
+                        secure: true,
+                        sameSite: 'none'
                     })
                     .cookie("refresh-token", token.refreshToken, {
                         expires: token.maxAge,
                         httpOnly: true,
+                        secure: true,
+                        sameSite: 'none'
                     })
                     .json({
                         expires: token.expiresIn,
@@ -88,10 +92,14 @@ exports.get = async (req, res, next) => {
                 .cookie("access-token", token.accessToken, {
                     expires: moment(token.expiresIn).toDate(),
                     httpOnly: true,
+                    secure: true,
+                    sameSite: 'none'
                 })
                 .cookie("refresh-token", token.refreshToken, {
                     expires: token.maxAge,
                     httpOnly: true,
+                    secure: true,
+                    sameSite: 'none'
                 })
                 .json({
                     expires: token.expiresIn,
@@ -133,6 +141,8 @@ exports.refresh = async (req, res, next) => {
                 .cookie("access-token", token, {
                     expires: moment(expiresIn).toDate(),
                     httpOnly: true,
+                    secure: true,
+                    sameSite: 'none'
                 })
                 .json({
                     expires: expiresIn,

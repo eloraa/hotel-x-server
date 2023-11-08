@@ -13,7 +13,7 @@ exports.list = async (req, res, next) => {
 
         if (!accessToken["access-token"])
             return res.status(httpStatus.UNAUTHORIZED).json({
-                message: "UNAUTHORIZED",
+                message: "Unauthorized",
             });
 
         const data = jwt.verify(accessToken["access-token"], jwtSecret);
@@ -55,7 +55,7 @@ exports.book = async (req, res, next) => {
 
         if (!accessToken["access-token"])
             return res.status(httpStatus.UNAUTHORIZED).json({
-                message: "UNAUTHORIZED",
+                message: "Unauthorized",
             });
 
         const data = jwt.verify(accessToken["access-token"], jwtSecret);
@@ -111,7 +111,7 @@ exports.delete = async (req, res, next) => {
 
         if (!accessToken["access-token"])
             return res.status(httpStatus.UNAUTHORIZED).json({
-                message: "UNAUTHORIZED",
+                message: "Unauthorized",
             });
 
         const data = jwt.verify(accessToken["access-token"], jwtSecret);

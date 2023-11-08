@@ -37,3 +37,4 @@ exports.roomCollection =  this.db.collection('rooms');
 exports.userCollection =  this.db.collection('users');
 exports.tokenCollection =  this.db.collection('tokens');
 exports.bookingCollection =  this.db.collection('bookings');
+exports.reviewCollection =  this.db.collection('reviews');
