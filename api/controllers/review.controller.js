@@ -1,15 +1,29 @@
-const { reviewCollection } = require("../../config/mongodb");
+const { reviewCollection, userCollection } = require("../../config/mongodb");
 const jwt = require("jsonwebtoken");
-const { pick } = require("lodash");
+const { pick, map, merge, find } = require("lodash");
 const { jwtSecret } = require("../../config/vars");
 const { ObjectId } = require("mongodb");
 const httpStatus = require("http-status");
 
 exports.get = async (req, res, next) => {
     try {
-        const reviews = await reviewCollection.findOne({
+        const reviews = await reviewCollection.find({
             roomId: req.params.id,
-        });
+        }).toArray();
+        if(reviews.length) {
+            const filter = map(reviews, "uid");
+            const query = { uid: { $in: filter } };
+            const users = await userCollection.find(query).toArray()
+            const data = map(reviews, (review) => {
+                const matching = find(users, { uid: review.uid });
+                if (matching) {
+                    return merge({}, review, matching);
+                } else {
+                    return review;
+                }
+            });
+            return res.json(data)
+        }
         res.json(reviews);
     } catch (error) {
         next(error);
