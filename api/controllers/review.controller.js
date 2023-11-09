@@ -51,7 +51,6 @@ exports.add = async (req, res, next) => {
                 "uid",
                 "roomId"
             );
-            console.log(reviewData);
             const result = await reviewCollection.insertOne(reviewData);
             if (result.insertedId) {
                 return res.json({ success: true });
@@ -63,6 +62,29 @@ exports.add = async (req, res, next) => {
                 message: "UNAUTHORIZED",
             });
         }
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.latest = async (req, res, next) => {
+    try {
+        const reviews = await reviewCollection.find().sort({ _id: -1 }).limit(6).toArray();
+        if(reviews.length) {
+            const filter = map(reviews, "uid");
+            const query = { uid: { $in: filter } };
+            const users = await userCollection.find(query).toArray()
+            const data = map(reviews, (review) => {
+                const matching = find(users, { uid: review.uid });
+                if (matching) {
+                    return merge({}, review, matching);
+                } else {
+                    return review;
+                }
+            });
+            return res.json(data)
+        }
+        res.json(reviews);
     } catch (error) {
         next(error);
     }

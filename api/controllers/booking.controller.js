@@ -28,11 +28,11 @@ exports.list = async (req, res, next) => {
             const rooms = await roomCollection.find(query).toArray();
 
             const data = map(bookings, (booking) => {
-                const matchingProduct = find(rooms, {
+                const matching = find(rooms, {
                     _id: new ObjectId(booking.roomId),
                 });
-                if (matchingProduct) {
-                    return merge({}, booking, matchingProduct);
+                if (matching) {
+                    return merge({}, booking, matching);
                 } else {
                     return booking;
                 }

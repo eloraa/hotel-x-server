@@ -23,5 +23,9 @@ router
     .route("/refresh-token")
 
     .post(validate(refresh), controller.refresh);
+router
+    .route("/remove-token")
+
+    .post(controller.remove);
 
 module.exports = router;

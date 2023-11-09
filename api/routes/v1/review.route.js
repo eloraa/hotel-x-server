@@ -7,6 +7,10 @@ const { get } = require("lodash");
 
 
 router
+    .route("/")
+
+    .get(controller.latest);
+router
     .route("/:id")
 
     .get(validate(get), controller.get);

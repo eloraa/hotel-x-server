@@ -138,6 +138,13 @@ exports.get = async (req, res, next) => {
         return next(error);
     }
 };
+exports.remove = async (req, res, next) => {
+    try {
+        return res.clearCookie('access-token', { maxAge: 0 }).clearCookie('refresh-token', { maxAge: 0 }).json({ success: true });
+    } catch (error) {
+        return next(error);
+    }
+};
 
 exports.refresh = async (req, res, next) => {
     try {
