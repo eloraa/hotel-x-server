@@ -5,6 +5,7 @@ const roomsroute = require('./rooms.route');
 const authroute = require('./auth.route');
 const bookingroute = require('./booking.route');
 const reviewroute = require('./review.route');
+const careerroute = require('./career.route');
 
 /**
  * GET v1/status
@@ -17,6 +18,7 @@ router.use('/rooms', roomsroute)
 router.use('/booking', bookingroute)
 router.use('/review', reviewroute)
 router.use('/auth', authroute)
+router.use('/career', careerroute)
 
 
 module.exports = router;
