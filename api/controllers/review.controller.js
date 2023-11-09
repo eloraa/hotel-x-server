@@ -49,7 +49,8 @@ exports.add = async (req, res, next) => {
                 "details",
                 "rating",
                 "uid",
-                "roomId"
+                "roomId",
+                "date"
             );
             const result = await reviewCollection.insertOne(reviewData);
             if (result.insertedId) {
