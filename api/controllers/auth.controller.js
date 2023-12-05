@@ -102,8 +102,6 @@ exports.update = async (req, res, next) => {
 };
 exports.get = async (req, res, next) => {
     try {
-        const userData = pick(req.body, "uid", "email");
-
         const err = {
             status: httpStatus.UNAUTHORIZED,
             message: "User not found",
